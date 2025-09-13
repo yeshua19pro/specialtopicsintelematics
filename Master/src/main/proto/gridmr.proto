@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package gridmr;
+option java_multiple_files = true;
+option java_package = "gridmr";
+
+service MapReduceService {
+  rpc SubmitJob(JobRequest) returns (JobResponse);
+  rpc RegisterWorker(WorkerRegistrationRequest) returns (WorkerRegistrationResponse);
+  rpc GetTask(TaskRequest) returns (TaskResponse);
+  rpc SubmitTaskResult(TaskResult) returns (TaskResultResponse);
+}
+
+//Service for data transfer between nodes
+service DataTransferService {
+  rpc ReceiveFile(ReceiveFileRequest) returns (stream FileChunk);
+  rpc SendFile(stream FileChunk) returns (SendFileResponse);
+}
+
+// Messages for the communication between master and workers
+message JobRequest {
+  string jobId = 1;
+  string mapFunction = 2;
+  string reduceFunction = 3;
+  string inputDataPath = 4;
+  int32 numReducers = 5;
+}
+
+message JobResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message WorkerRegistrationRequest {
+  string workerId = 1;
+  string address = 2;
+  string capacity = 3;
+}
+
+message WorkerRegistrationResponse {
+  bool success = 1;
+}
+
+message TaskRequest {
+  string workerId = 1;
+}
+
+message TaskResponse {
+  enum TaskType {
+    NO_TASK = 0;
+    MAP_TASK = 1;
+    REDUCE_TASK = 2;
+  }
+  TaskType taskType = 1;
+  string taskId = 2;
+  string dataSplitPath = 3;
+  repeated string intermediateFiles = 4;
+  string jobId = 5;
+}
+
+message TaskResult {
+  string taskId = 1;
+  string jobId = 2;
+  bool success = 3;
+  string resultPath = 4;
+  map<string, int32> wordCountResults = 5;
+}
+
+message TaskResultResponse {
+  bool success = 1;
+}
+
+message ReceiveFileRequest {
+  string filePath = 1;
+}
+
+message FileChunk {
+  bytes data = 1;
+}
+
+message SendFileResponse {
+  bool success = 1;
+}
