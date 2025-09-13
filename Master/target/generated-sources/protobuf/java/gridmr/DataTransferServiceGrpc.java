@@ -4,7 +4,7 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
  * <pre>
- * Service for data transfer between nodes
+ *Service for data transfer between nodes
  * </pre>
  */
 @javax.annotation.Generated(
@@ -126,7 +126,7 @@ public final class DataTransferServiceGrpc {
 
   /**
    * <pre>
-   * Service for data transfer between nodes
+   *Service for data transfer between nodes
    * </pre>
    */
   public interface AsyncService {
@@ -149,7 +149,7 @@ public final class DataTransferServiceGrpc {
   /**
    * Base class for the server implementation of the service DataTransferService.
    * <pre>
-   * Service for data transfer between nodes
+   *Service for data transfer between nodes
    * </pre>
    */
   public static abstract class DataTransferServiceImplBase
@@ -163,7 +163,7 @@ public final class DataTransferServiceGrpc {
   /**
    * A stub to allow clients to do asynchronous rpc calls to service DataTransferService.
    * <pre>
-   * Service for data transfer between nodes
+   *Service for data transfer between nodes
    * </pre>
    */
   public static final class DataTransferServiceStub
@@ -199,7 +199,7 @@ public final class DataTransferServiceGrpc {
   /**
    * A stub to allow clients to do synchronous rpc calls to service DataTransferService.
    * <pre>
-   * Service for data transfer between nodes
+   *Service for data transfer between nodes
    * </pre>
    */
   public static final class DataTransferServiceBlockingStub
@@ -227,7 +227,7 @@ public final class DataTransferServiceGrpc {
   /**
    * A stub to allow clients to do ListenableFuture-style rpc calls to service DataTransferService.
    * <pre>
-   * Service for data transfer between nodes
+   *Service for data transfer between nodes
    * </pre>
    */
   public static final class DataTransferServiceFutureStub
