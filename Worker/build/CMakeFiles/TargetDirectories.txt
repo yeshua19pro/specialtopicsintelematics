@@ -1,0 +1,3 @@
+/home/mlgdaniel/specialtopicsintelematics/Worker/build/CMakeFiles/worker.dir
+/home/mlgdaniel/specialtopicsintelematics/Worker/build/CMakeFiles/edit_cache.dir
+/home/mlgdaniel/specialtopicsintelematics/Worker/build/CMakeFiles/rebuild_cache.dir
