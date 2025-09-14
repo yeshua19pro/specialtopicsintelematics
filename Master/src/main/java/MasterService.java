@@ -10,6 +10,8 @@ import gridmr.WorkerRegistrationResponse;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +20,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.regions.Region;
+import java.io.InputStream;
 
 /**
  * This class is responsible for coordinating distributed MapReduce jobs. It manages worker
@@ -95,29 +98,34 @@ public class MasterService {
             System.out.println("Received new job: " + request.getJobId());
             String jobToken = UUID.randomUUID().toString();
             String inputS3KeyPrefix = "jobs/" + jobToken + "/input/";
-
-            for (int i = 0; i < 5; i++) {
-                String inputS3Key = inputS3KeyPrefix + "block_" + i + ".txt";
-                String dummyData = "This is block " + i + " of the input data for job " + request.getJobId();
-                try {
-                    s3.putObject(PutObjectRequest.builder().bucket(s3BucketName).key(inputS3Key).build(), RequestBody.fromString(dummyData));
-                } catch (Exception e) {
-                    System.err.println("Failed to upload data to S3: " + e.getMessage());
-                    responseObserver.onError(io.grpc.Status.INTERNAL.withDescription("Failed to upload data to S3").asRuntimeException());
-                    return;
+            
+            // Reemplaza el código de simulación por el nuevo método para subir archivos en bloques
+            try {
+                int numberOfBlocks = uploadFileInBlocksToS3(request.getInputDataPath(), inputS3KeyPrefix);
+                
+                for (int i = 0; i < numberOfBlocks; i++) {
+                    String inputS3Key = inputS3KeyPrefix + "block_" + i + ".bin";
+                    String taskId = UUID.randomUUID().toString();
+                    TaskResponse mapTask = TaskResponse.newBuilder()
+                            .setTaskId(taskId)
+                            .setTaskType(TaskResponse.TaskType.MAP_TASK)
+                            .setDataSplitPath(inputS3Key)
+                            .setJobId(request.getJobId())
+                            .build();
+                    mapTasks.add(mapTask);
                 }
-                String taskId = UUID.randomUUID().toString();
-                TaskResponse mapTask = TaskResponse.newBuilder()
-                        .setTaskId(taskId)
-                        .setTaskType(TaskResponse.TaskType.MAP_TASK)
-                        .setDataSplitPath(inputS3Key)
-                        .setJobId(request.getJobId())
-                        .build();
-                mapTasks.add(mapTask);
+                
+                JobResponse response = JobResponse.newBuilder().setSuccess(true).setMessage("Job submitted").build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+
+            } catch (IOException e) {
+                System.err.println("Failed to read local file: " + e.getMessage());
+                responseObserver.onError(io.grpc.Status.INTERNAL.withDescription("Failed to read local file").asRuntimeException());
+            } catch (Exception e) {
+                System.err.println("Failed to upload data to S3: " + e.getMessage());
+                responseObserver.onError(io.grpc.Status.INTERNAL.withDescription("Failed to upload data to S3").asRuntimeException());
             }
-            JobResponse response = JobResponse.newBuilder().setSuccess(true).setMessage("Job submitted").build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
         }
 
         /**
@@ -177,5 +185,36 @@ public class MasterService {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         }
+    }
+    
+    /**
+     * Reads a local file in fixed-size blocks and uploads each block to an S3 bucket.
+     * @param localFilePath The local path of the file to be processed.
+     * @param inputS3KeyPrefix The S3 key prefix for the uploaded blocks.
+     * @return The number of blocks uploaded to S3.
+     * @throws IOException If the file cannot be read.
+     */
+    private int uploadFileInBlocksToS3(String localFilePath, String inputS3KeyPrefix) throws IOException {
+        File file = new File(localFilePath);
+        if (!file.exists()) {
+            throw new IOException("File not found: " + localFilePath);
+        }
+        
+        long fileSize = file.length();
+        long partSize = 64 * 1024 * 1024; // 64 MB
+        int partNumber = 0;
+
+        try (InputStream inputStream = new FileInputStream(file)) {
+            byte[] buffer = new byte[(int) partSize];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                String s3Key = inputS3KeyPrefix + "block_" + partNumber + ".bin";
+                s3.putObject(PutObjectRequest.builder().bucket(s3BucketName).key(s3Key).build(), RequestBody.fromBytes(buffer));
+                System.out.println("Uploaded part " + partNumber + " to " + s3Key);
+                partNumber++;
+            }
+        }
+        
+        return partNumber;
     }
 }
