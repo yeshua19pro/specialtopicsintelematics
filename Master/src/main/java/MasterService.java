@@ -1,26 +1,29 @@
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
-import io.grpc.stub.StreamObserver;
-import com.google.protobuf.ByteString;
-import gridmr.DataTransferServiceGrpc;
-import gridmr.FileChunk;
 import gridmr.JobRequest;
 import gridmr.JobResponse;
 import gridmr.MapReduceServiceGrpc;
-import gridmr.ReceiveFileRequest;
 import gridmr.TaskRequest;
 import gridmr.TaskResponse;
 import gridmr.TaskResult;
 import gridmr.TaskResultResponse;
 import gridmr.WorkerRegistrationRequest;
 import gridmr.WorkerRegistrationResponse;
-import java.io.File;
-import java.io.FileInputStream;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.regions.Region;
 
+/**
+ * This class is responsible for coordinating distributed MapReduce jobs. It manages worker
+ * registration, job submission, task scheduling, and result collection.
+ * * @author Yashua and Jose
+ */
 public class MasterService {
 
     private final int port;
@@ -29,15 +32,30 @@ public class MasterService {
     private final ConcurrentLinkedQueue<TaskResponse> mapTasks = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<TaskResponse> reduceTasks = new ConcurrentLinkedQueue<>();
     private final ConcurrentHashMap<String, TaskResponse> runningTasks = new ConcurrentHashMap<>();
+    private final S3Client s3;
+    private final String s3BucketName = "your-unique-gridmr-bucket-name";
 
+    /**
+     * Constructs a new MasterService.
+     *
+     * @param port The port on which the gRPC server will listen.
+     */
     public MasterService(int port) {
         this.port = port;
+        // Initializes the S3 client for the desired region.
+        // Authentication is handled via EC2 instance credentials or AWS profile.
+        this.s3 = S3Client.builder().region(Region.US_EAST_1).build();
     }
 
+    /**
+     * Starts the gRPC server, binding it to the specified port.
+     * Also sets up a shutdown hook for graceful termination.
+     *
+     * @throws IOException If the server fails to bind to the port.
+     */
     public void start() throws IOException {
         server = ServerBuilder.forPort(port)
                 .addService(new MasterServiceImpl())
-                .addService(new DataTransferServiceImpl())
                 .build()
                 .start();
         System.out.println("Master started, listening on " + port);
@@ -49,25 +67,50 @@ public class MasterService {
         }));
     }
 
+    /**
+     * Waits for the gRPC server to end.
+     * Keeps the main thread alive.
+     *
+     * @throws InterruptedException If the thread is interrupted while waiting.
+     */
     public void blockUntilShutdown() throws InterruptedException {
         if (server != null) {
             server.awaitTermination();
         }
     }
 
-
+    /**
+     * Inner class that handles all
+     * gRPC calls from clients and workers.
+     */
     private class MasterServiceImpl extends MapReduceServiceGrpc.MapReduceServiceImplBase {
+        /**
+         * Divides the input data into blocks
+         *
+         * @param request The JobRequest containing job details.
+         * @param responseObserver A stream observer to send back the JobResponse.
+         */
         @Override
         public void submitJob(JobRequest request, StreamObserver<JobResponse> responseObserver) {
             System.out.println("Received new job: " + request.getJobId());
             String jobToken = UUID.randomUUID().toString();
+            String inputS3KeyPrefix = "jobs/" + jobToken + "/input/";
+
             for (int i = 0; i < 5; i++) {
+                String inputS3Key = inputS3KeyPrefix + "block_" + i + ".txt";
+                String dummyData = "This is block " + i + " of the input data for job " + request.getJobId();
+                try {
+                    s3.putObject(PutObjectRequest.builder().bucket(s3BucketName).key(inputS3Key).build(), RequestBody.fromString(dummyData));
+                } catch (Exception e) {
+                    System.err.println("Failed to upload data to S3: " + e.getMessage());
+                    responseObserver.onError(io.grpc.Status.INTERNAL.withDescription("Failed to upload data to S3").asRuntimeException());
+                    return;
+                }
                 String taskId = UUID.randomUUID().toString();
-                String inputFilePath = request.getInputDataPath() + "/block_" + i + ".txt";
                 TaskResponse mapTask = TaskResponse.newBuilder()
                         .setTaskId(taskId)
                         .setTaskType(TaskResponse.TaskType.MAP_TASK)
-                        .setDataSplitPath(inputFilePath)
+                        .setDataSplitPath(inputS3Key)
                         .setJobId(request.getJobId())
                         .build();
                 mapTasks.add(mapTask);
@@ -77,6 +120,13 @@ public class MasterService {
             responseObserver.onCompleted();
         }
 
+        /**
+         * This registers a new worker with the master. The worker's ID and network
+         * address are stored for task assignment.
+         *
+         * @param request The WorkerRegistrationRequest containing worker details.
+         * @param responseObserver A stream observer to send back the registration response.
+         */
         @Override
         public void registerWorker(WorkerRegistrationRequest request, StreamObserver<WorkerRegistrationResponse> responseObserver) {
             registeredWorkers.put(request.getWorkerId(), request.getAddress());
@@ -86,6 +136,14 @@ public class MasterService {
             responseObserver.onCompleted();
         }
 
+        /**
+         * Assigns a new task (either Map or Reduce) to a worker. The master
+         * checks its queues for available tasks and assigns them based on a
+         * first-come, first-served basis.
+         *
+         * @param request The TaskRequest from the worker.
+         * @param responseObserver A stream observer to send back the assigned task.
+         */
         @Override
         public void getTask(TaskRequest request, StreamObserver<TaskResponse> responseObserver) {
             TaskResponse task = mapTasks.poll();
@@ -104,34 +162,20 @@ public class MasterService {
             responseObserver.onCompleted();
         }
 
+        /**
+         * Receives the result of a completed task from a worker. 
+         *
+         * @param request The task's outcome.
+         * @param responseObserver An Observer to confirm task completion.
+         */
         @Override
         public void submitTaskResult(TaskResult request, StreamObserver<TaskResultResponse> responseObserver) {
             System.out.println("Task completed: " + request.getTaskId());
             runningTasks.remove(request.getTaskId());
+            // Logic to manage intermediate and final results in S3
             TaskResultResponse response = TaskResultResponse.newBuilder().setSuccess(true).build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-        }
-    }
-
-    private static class DataTransferServiceImpl extends MapReduceServiceGrpc.MapReduceServiceImplBase {
-        public void receiveFile(ReceiveFileRequest request, StreamObserver<FileChunk> responseObserver) {
-            System.out.println("Master receiving request for file: " + request.getFilePath());
-            File file = new File(request.getFilePath());
-            if (!file.exists()) {
-                responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription("File not found").asRuntimeException());
-                return;
-            }
-            try (FileInputStream fis = new FileInputStream(file)) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = fis.read(buffer)) != -1) {
-                    responseObserver.onNext(FileChunk.newBuilder().setData(ByteString.copyFrom(buffer, 0, bytesRead)).build());
-                }
-                responseObserver.onCompleted();
-            } catch (IOException e) {
-                responseObserver.onError(io.grpc.Status.INTERNAL.withDescription("File read error").asRuntimeException());
-            }
         }
     }
 }
