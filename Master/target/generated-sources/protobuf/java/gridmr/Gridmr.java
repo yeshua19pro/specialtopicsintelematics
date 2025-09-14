@@ -83,41 +83,41 @@ public final class Gridmr {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\014gridmr.proto\022\006gridmr\"t\n\nJobRequest\022\r\n\005" +
+      "\n\014gridmr.proto\022\006gridmr\"p\n\nJobRequest\022\r\n\005" +
       "jobId\030\001 \001(\t\022\023\n\013mapFunction\030\002 \001(\t\022\026\n\016redu" +
-      "ceFunction\030\003 \001(\t\022\025\n\rinputDataPath\030\004 \001(\t\022" +
-      "\023\n\013numReducers\030\005 \001(\005\"/\n\013JobResponse\022\017\n\007s" +
-      "uccess\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\"P\n\031WorkerR" +
-      "egistrationRequest\022\020\n\010workerId\030\001 \001(\t\022\017\n\007" +
-      "address\030\002 \001(\t\022\020\n\010capacity\030\003 \001(\t\"-\n\032Worke" +
-      "rRegistrationResponse\022\017\n\007success\030\001 \001(\010\"\037" +
-      "\n\013TaskRequest\022\020\n\010workerId\030\001 \001(\t\"\310\001\n\014Task" +
-      "Response\022/\n\010taskType\030\001 \001(\0162\035.gridmr.Task" +
-      "Response.TaskType\022\016\n\006taskId\030\002 \001(\t\022\025\n\rdat" +
-      "aSplitPath\030\003 \001(\t\022\031\n\021intermediateFiles\030\004 " +
-      "\003(\t\022\r\n\005jobId\030\005 \001(\t\"6\n\010TaskType\022\013\n\007NO_TAS" +
-      "K\020\000\022\014\n\010MAP_TASK\020\001\022\017\n\013REDUCE_TASK\020\002\"\337\001\n\nT" +
-      "askResult\022\016\n\006taskId\030\001 \001(\t\022\r\n\005jobId\030\002 \001(\t" +
-      "\022\017\n\007success\030\003 \001(\010\022\022\n\nresultPath\030\004 \001(\t\022B\n" +
-      "\020wordCountResults\030\005 \003(\0132(.gridmr.TaskRes" +
-      "ult.WordCountResultsEntry\022\020\n\010workerId\030\006 " +
-      "\001(\t\0327\n\025WordCountResultsEntry\022\013\n\003key\030\001 \001(" +
-      "\t\022\r\n\005value\030\002 \001(\005:\0028\001\"%\n\022TaskResultRespon" +
-      "se\022\017\n\007success\030\001 \001(\010\"&\n\022ReceiveFileReques" +
-      "t\022\020\n\010filePath\030\001 \001(\t\"\031\n\tFileChunk\022\014\n\004data" +
-      "\030\001 \001(\014\"#\n\020SendFileResponse\022\017\n\007success\030\001 " +
-      "\001(\0102\233\002\n\020MapReduceService\0224\n\tSubmitJob\022\022." +
-      "gridmr.JobRequest\032\023.gridmr.JobResponse\022W" +
-      "\n\016RegisterWorker\022!.gridmr.WorkerRegistra" +
-      "tionRequest\032\".gridmr.WorkerRegistrationR" +
-      "esponse\0224\n\007GetTask\022\023.gridmr.TaskRequest\032" +
-      "\024.gridmr.TaskResponse\022B\n\020SubmitTaskResul" +
-      "t\022\022.gridmr.TaskResult\032\032.gridmr.TaskResul" +
-      "tResponse2\220\001\n\023DataTransferService\022>\n\013Rec" +
-      "eiveFile\022\032.gridmr.ReceiveFileRequest\032\021.g" +
-      "ridmr.FileChunk0\001\0229\n\010SendFile\022\021.gridmr.F" +
-      "ileChunk\032\030.gridmr.SendFileResponse(\001B\n\n\006" +
-      "gridmrP\001b\006proto3"
+      "ceFunction\030\003 \001(\t\022\021\n\tinputData\030\004 \001(\014\022\023\n\013n" +
+      "umReducers\030\005 \001(\005\"/\n\013JobResponse\022\017\n\007succe" +
+      "ss\030\001 \001(\010\022\017\n\007message\030\002 \001(\t\"P\n\031WorkerRegis" +
+      "trationRequest\022\020\n\010workerId\030\001 \001(\t\022\017\n\007addr" +
+      "ess\030\002 \001(\t\022\020\n\010capacity\030\003 \001(\t\"-\n\032WorkerReg" +
+      "istrationResponse\022\017\n\007success\030\001 \001(\010\"\037\n\013Ta" +
+      "skRequest\022\020\n\010workerId\030\001 \001(\t\"\310\001\n\014TaskResp" +
+      "onse\022/\n\010taskType\030\001 \001(\0162\035.gridmr.TaskResp" +
+      "onse.TaskType\022\016\n\006taskId\030\002 \001(\t\022\025\n\rdataSpl" +
+      "itPath\030\003 \001(\t\022\031\n\021intermediateFiles\030\004 \003(\t\022" +
+      "\r\n\005jobId\030\005 \001(\t\"6\n\010TaskType\022\013\n\007NO_TASK\020\000\022" +
+      "\014\n\010MAP_TASK\020\001\022\017\n\013REDUCE_TASK\020\002\"\337\001\n\nTaskR" +
+      "esult\022\016\n\006taskId\030\001 \001(\t\022\r\n\005jobId\030\002 \001(\t\022\017\n\007" +
+      "success\030\003 \001(\010\022\022\n\nresultPath\030\004 \001(\t\022B\n\020wor" +
+      "dCountResults\030\005 \003(\0132(.gridmr.TaskResult." +
+      "WordCountResultsEntry\022\020\n\010workerId\030\006 \001(\t\032" +
+      "7\n\025WordCountResultsEntry\022\013\n\003key\030\001 \001(\t\022\r\n" +
+      "\005value\030\002 \001(\005:\0028\001\"%\n\022TaskResultResponse\022\017" +
+      "\n\007success\030\001 \001(\010\"&\n\022ReceiveFileRequest\022\020\n" +
+      "\010filePath\030\001 \001(\t\"\031\n\tFileChunk\022\014\n\004data\030\001 \001" +
+      "(\014\"#\n\020SendFileResponse\022\017\n\007success\030\001 \001(\0102" +
+      "\233\002\n\020MapReduceService\0224\n\tSubmitJob\022\022.grid" +
+      "mr.JobRequest\032\023.gridmr.JobResponse\022W\n\016Re" +
+      "gisterWorker\022!.gridmr.WorkerRegistration" +
+      "Request\032\".gridmr.WorkerRegistrationRespo" +
+      "nse\0224\n\007GetTask\022\023.gridmr.TaskRequest\032\024.gr" +
+      "idmr.TaskResponse\022B\n\020SubmitTaskResult\022\022." +
+      "gridmr.TaskResult\032\032.gridmr.TaskResultRes" +
+      "ponse2\220\001\n\023DataTransferService\022>\n\013Receive" +
+      "File\022\032.gridmr.ReceiveFileRequest\032\021.gridm" +
+      "r.FileChunk0\001\0229\n\010SendFile\022\021.gridmr.FileC" +
+      "hunk\032\030.gridmr.SendFileResponse(\001B\n\n\006grid" +
+      "mrP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -128,7 +128,7 @@ public final class Gridmr {
     internal_static_gridmr_JobRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_gridmr_JobRequest_descriptor,
-        new java.lang.String[] { "JobId", "MapFunction", "ReduceFunction", "InputDataPath", "NumReducers", });
+        new java.lang.String[] { "JobId", "MapFunction", "ReduceFunction", "InputData", "NumReducers", });
     internal_static_gridmr_JobResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_gridmr_JobResponse_fieldAccessorTable = new

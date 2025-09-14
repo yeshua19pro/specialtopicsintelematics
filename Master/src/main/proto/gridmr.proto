@@ -11,7 +11,7 @@ service MapReduceService {
   rpc SubmitTaskResult(TaskResult) returns (TaskResultResponse);
 }
 
-//Service for data transfer between nodes
+// Service for data transfer between nodes
 service DataTransferService {
   rpc ReceiveFile(ReceiveFileRequest) returns (stream FileChunk);
   rpc SendFile(stream FileChunk) returns (SendFileResponse);
@@ -22,7 +22,7 @@ message JobRequest {
   string jobId = 1;
   string mapFunction = 2;
   string reduceFunction = 3;
-  string inputDataPath = 4;
+  bytes inputData = 4;   // 👈 ahora en vez de ruta, enviamos los datos del archivo
   int32 numReducers = 5;
 }
 

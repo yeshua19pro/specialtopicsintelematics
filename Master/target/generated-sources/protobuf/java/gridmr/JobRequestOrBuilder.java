@@ -44,16 +44,14 @@ public interface JobRequestOrBuilder extends
       getReduceFunctionBytes();
 
   /**
-   * <code>string inputDataPath = 4;</code>
-   * @return The inputDataPath.
+   * <pre>
+   * 👈 ahora en vez de ruta, enviamos los datos del archivo
+   * </pre>
+   *
+   * <code>bytes inputData = 4;</code>
+   * @return The inputData.
    */
-  java.lang.String getInputDataPath();
-  /**
-   * <code>string inputDataPath = 4;</code>
-   * @return The bytes for inputDataPath.
-   */
-  com.google.protobuf.ByteString
-      getInputDataPathBytes();
+  com.google.protobuf.ByteString getInputData();
 
   /**
    * <code>int32 numReducers = 5;</code>

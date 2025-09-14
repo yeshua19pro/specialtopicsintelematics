@@ -1,4 +1,4 @@
-
+package gridmr;
 import gridmr.JobRequest;
 import gridmr.JobResponse;
 import gridmr.MapReduceServiceGrpc;
@@ -22,7 +22,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.regions.Region;
 import java.io.InputStream;
-
+import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 /**
  * This class is responsible for coordinating distributed MapReduce jobs. It
  * manages worker registration, job submission, task scheduling, and result
@@ -50,7 +52,10 @@ public class MasterService {
         this.port = port;
         // Initializes the S3 client for the desired region.
         // Authentication is handled via EC2 instance credentials or AWS profile.
-        this.s3 = S3Client.builder().region(Region.US_EAST_1).build();
+        this.s3 = S3Client.builder()
+                .region(Region.of(System.getenv("AWS_REGION")))
+                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+                .build();
     }
 
     /**
@@ -102,9 +107,11 @@ public class MasterService {
             String jobToken = UUID.randomUUID().toString();
             String inputS3KeyPrefix = "jobs/" + jobToken + "/input/";
 
-            // Reemplaza el código de simulación por el nuevo método para subir archivos en bloques
             try {
-                int numberOfBlocks = uploadFileInBlocksToS3(request.getInputDataPath(), inputS3KeyPrefix);
+                // ✅ ahora usamos los bytes directamente
+                byte[] inputData = request.getInputData().toByteArray();
+
+                int numberOfBlocks = uploadBytesInBlocksToS3(inputData, inputS3KeyPrefix);
 
                 for (int i = 0; i < numberOfBlocks; i++) {
                     String inputS3Key = inputS3KeyPrefix + "block_" + i + ".bin";
@@ -118,16 +125,18 @@ public class MasterService {
                     mapTasks.add(mapTask);
                 }
 
-                JobResponse response = JobResponse.newBuilder().setSuccess(true).setMessage("Job submitted").build();
+                JobResponse response = JobResponse.newBuilder()
+                        .setSuccess(true)
+                        .setMessage("Job submitted")
+                        .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
 
-            } catch (IOException e) {
-                System.err.println("Failed to read local file: " + e.getMessage());
-                responseObserver.onError(io.grpc.Status.INTERNAL.withDescription("Failed to read local file").asRuntimeException());
             } catch (Exception e) {
                 System.err.println("Failed to upload data to S3: " + e.getMessage());
-                responseObserver.onError(io.grpc.Status.INTERNAL.withDescription("Failed to upload data to S3").asRuntimeException());
+                responseObserver.onError(io.grpc.Status.INTERNAL
+                        .withDescription("Failed to upload data to S3")
+                        .asRuntimeException());
             }
         }
 
@@ -202,32 +211,28 @@ public class MasterService {
      * @return The number of blocks uploaded to S3.
      * @throws IOException If the file cannot be read.
      */
-    private int uploadFileInBlocksToS3(String localFilePath, String inputS3KeyPrefix) throws IOException {
-        File file = new File(localFilePath);
-        if (!file.exists()) {
-            throw new IOException("File not found: " + localFilePath);
-        }
-
-        long partSize = 64 * 1024 * 1024; // 64 MB
+    private int uploadBytesInBlocksToS3(byte[] data, String inputS3KeyPrefix) throws IOException {
+        int partSize = 64 * 1024 * 1024; // 64 MB
         int partNumber = 0;
+        int offset = 0;
 
-        try (InputStream inputStream = new FileInputStream(file)) {
-            byte[] buffer = new byte[(int) partSize];
-            int bytesRead;
+        while (offset < data.length) {
+            int chunkSize = Math.min(partSize, data.length - offset);
+            byte[] chunk = new byte[chunkSize];
+            System.arraycopy(data, offset, chunk, 0, chunkSize);
 
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                String s3Key = inputS3KeyPrefix + "block_" + partNumber + ".bin";
+            String s3Key = inputS3KeyPrefix + "block_" + partNumber + ".bin";
 
-                byte[] finalBuffer = new byte[bytesRead];
-                System.arraycopy(buffer, 0, finalBuffer, 0, bytesRead);
+            s3.putObject(
+                    PutObjectRequest.builder().bucket(s3BucketName).key(s3Key).build(),
+                    RequestBody.fromBytes(chunk)
+            );
 
-                s3.putObject(PutObjectRequest.builder().bucket(s3BucketName).key(s3Key).build(), RequestBody.fromBytes(finalBuffer));
-
-                System.out.println("Uploaded part " + partNumber + " with " + bytesRead + " bytes to " + s3Key);
-                partNumber++;
-            }
+            System.out.println("Uploaded part " + partNumber + " with " + chunkSize + " bytes to " + s3Key);
+            partNumber++;
+            offset += chunkSize;
         }
-
         return partNumber;
     }
+
 }
