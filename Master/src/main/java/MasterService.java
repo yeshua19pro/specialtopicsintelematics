@@ -1,3 +1,4 @@
+
 import gridmr.JobRequest;
 import gridmr.JobResponse;
 import gridmr.MapReduceServiceGrpc;
@@ -23,8 +24,10 @@ import software.amazon.awssdk.regions.Region;
 import java.io.InputStream;
 
 /**
- * This class is responsible for coordinating distributed MapReduce jobs. It manages worker
- * registration, job submission, task scheduling, and result collection.
+ * This class is responsible for coordinating distributed MapReduce jobs. It
+ * manages worker registration, job submission, task scheduling, and result
+ * collection.
+ *
  * * @author Yashua and Jose
  */
 public class MasterService {
@@ -51,8 +54,8 @@ public class MasterService {
     }
 
     /**
-     * Starts the gRPC server, binding it to the specified port.
-     * Also sets up a shutdown hook for graceful termination.
+     * Starts the gRPC server, binding it to the specified port. Also sets up a
+     * shutdown hook for graceful termination.
      *
      * @throws IOException If the server fails to bind to the port.
      */
@@ -71,8 +74,7 @@ public class MasterService {
     }
 
     /**
-     * Waits for the gRPC server to end.
-     * Keeps the main thread alive.
+     * Waits for the gRPC server to end. Keeps the main thread alive.
      *
      * @throws InterruptedException If the thread is interrupted while waiting.
      */
@@ -83,26 +85,27 @@ public class MasterService {
     }
 
     /**
-     * Inner class that handles all
-     * gRPC calls from clients and workers.
+     * Inner class that handles all gRPC calls from clients and workers.
      */
     private class MasterServiceImpl extends MapReduceServiceGrpc.MapReduceServiceImplBase {
+
         /**
          * Divides the input data into blocks
          *
          * @param request The JobRequest containing job details.
-         * @param responseObserver A stream observer to send back the JobResponse.
+         * @param responseObserver A stream observer to send back the
+         * JobResponse.
          */
         @Override
         public void submitJob(JobRequest request, StreamObserver<JobResponse> responseObserver) {
             System.out.println("Received new job: " + request.getJobId());
             String jobToken = UUID.randomUUID().toString();
             String inputS3KeyPrefix = "jobs/" + jobToken + "/input/";
-            
+
             // Reemplaza el código de simulación por el nuevo método para subir archivos en bloques
             try {
                 int numberOfBlocks = uploadFileInBlocksToS3(request.getInputDataPath(), inputS3KeyPrefix);
-                
+
                 for (int i = 0; i < numberOfBlocks; i++) {
                     String inputS3Key = inputS3KeyPrefix + "block_" + i + ".bin";
                     String taskId = UUID.randomUUID().toString();
@@ -114,7 +117,7 @@ public class MasterService {
                             .build();
                     mapTasks.add(mapTask);
                 }
-                
+
                 JobResponse response = JobResponse.newBuilder().setSuccess(true).setMessage("Job submitted").build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
@@ -129,11 +132,13 @@ public class MasterService {
         }
 
         /**
-         * This registers a new worker with the master. The worker's ID and network
-         * address are stored for task assignment.
+         * This registers a new worker with the master. The worker's ID and
+         * network address are stored for task assignment.
          *
-         * @param request The WorkerRegistrationRequest containing worker details.
-         * @param responseObserver A stream observer to send back the registration response.
+         * @param request The WorkerRegistrationRequest containing worker
+         * details.
+         * @param responseObserver A stream observer to send back the
+         * registration response.
          */
         @Override
         public void registerWorker(WorkerRegistrationRequest request, StreamObserver<WorkerRegistrationResponse> responseObserver) {
@@ -150,7 +155,8 @@ public class MasterService {
          * first-come, first-served basis.
          *
          * @param request The TaskRequest from the worker.
-         * @param responseObserver A stream observer to send back the assigned task.
+         * @param responseObserver A stream observer to send back the assigned
+         * task.
          */
         @Override
         public void getTask(TaskRequest request, StreamObserver<TaskResponse> responseObserver) {
@@ -171,7 +177,7 @@ public class MasterService {
         }
 
         /**
-         * Receives the result of a completed task from a worker. 
+         * Receives the result of a completed task from a worker.
          *
          * @param request The task's outcome.
          * @param responseObserver An Observer to confirm task completion.
@@ -186,9 +192,11 @@ public class MasterService {
             responseObserver.onCompleted();
         }
     }
-    
+
     /**
-     * Reads a local file in fixed-size blocks and uploads each block to an S3 bucket.
+     * Reads a local file in fixed-size blocks and uploads each block to an S3
+     * bucket.
+     *
      * @param localFilePath The local path of the file to be processed.
      * @param inputS3KeyPrefix The S3 key prefix for the uploaded blocks.
      * @return The number of blocks uploaded to S3.
@@ -199,22 +207,27 @@ public class MasterService {
         if (!file.exists()) {
             throw new IOException("File not found: " + localFilePath);
         }
-        
-        long fileSize = file.length();
+
         long partSize = 64 * 1024 * 1024; // 64 MB
         int partNumber = 0;
 
         try (InputStream inputStream = new FileInputStream(file)) {
             byte[] buffer = new byte[(int) partSize];
             int bytesRead;
+
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 String s3Key = inputS3KeyPrefix + "block_" + partNumber + ".bin";
-                s3.putObject(PutObjectRequest.builder().bucket(s3BucketName).key(s3Key).build(), RequestBody.fromBytes(buffer));
-                System.out.println("Uploaded part " + partNumber + " to " + s3Key);
+
+                byte[] finalBuffer = new byte[bytesRead];
+                System.arraycopy(buffer, 0, finalBuffer, 0, bytesRead);
+
+                s3.putObject(PutObjectRequest.builder().bucket(s3BucketName).key(s3Key).build(), RequestBody.fromBytes(finalBuffer));
+
+                System.out.println("Uploaded part " + partNumber + " with " + bytesRead + " bytes to " + s3Key);
                 partNumber++;
             }
         }
-        
+
         return partNumber;
     }
 }

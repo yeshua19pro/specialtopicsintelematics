@@ -27,9 +27,11 @@ gridmr\TaskResponse.class
 gridmr\FileChunk$1.class
 gridmr\DataTransferServiceGrpc$DataTransferServiceMethodDescriptorSupplier.class
 gridmr\DataTransferServiceGrpc$MethodHandlers.class
+MasterService.class
 gridmr\TaskResult.class
 gridmr\TaskResultOrBuilder.class
 gridmr\WorkerRegistrationResponse$1.class
+MasterService$MasterServiceImpl.class
 gridmr\DataTransferServiceGrpc.class
 gridmr\MapReduceServiceGrpc$MapReduceServiceFileDescriptorSupplier.class
 gridmr\TaskResultResponse$1.class

@@ -11,13 +11,13 @@ service MapReduceService {
   rpc SubmitTaskResult(TaskResult) returns (TaskResultResponse);
 }
 
-// NEW SERVICE FOR DATA TRANSFER
+//Service for data transfer between nodes
 service DataTransferService {
   rpc ReceiveFile(ReceiveFileRequest) returns (stream FileChunk);
   rpc SendFile(stream FileChunk) returns (SendFileResponse);
 }
 
-// Messages for the communication
+// Messages for the communication between master and workers
 message JobRequest {
   string jobId = 1;
   string mapFunction = 2;

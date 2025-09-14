@@ -5,7 +5,7 @@ package gridmr;
 
 /**
  * <pre>
- * Messages for the communication
+ * Messages for the communication between master and workers
  * </pre>
  *
  * Protobuf type {@code gridmr.JobRequest}
@@ -412,7 +412,7 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Messages for the communication
+   * Messages for the communication between master and workers
    * </pre>
    *
    * Protobuf type {@code gridmr.JobRequest}
