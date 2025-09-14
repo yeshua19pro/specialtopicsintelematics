@@ -80,4 +80,16 @@ public interface TaskResultOrBuilder extends
    */
   int getWordCountResultsOrThrow(
       java.lang.String key);
+
+  /**
+   * <code>string workerId = 6;</code>
+   * @return The workerId.
+   */
+  java.lang.String getWorkerId();
+  /**
+   * <code>string workerId = 6;</code>
+   * @return The bytes for workerId.
+   */
+  com.google.protobuf.ByteString
+      getWorkerIdBytes();
 }

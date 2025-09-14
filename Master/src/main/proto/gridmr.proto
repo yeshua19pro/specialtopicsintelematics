@@ -64,6 +64,7 @@ message TaskResult {
   bool success = 3;
   string resultPath = 4;
   map<string, int32> wordCountResults = 5;
+  string workerId = 6;
 }
 
 message TaskResultResponse {

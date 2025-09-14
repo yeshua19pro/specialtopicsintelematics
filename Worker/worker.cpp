@@ -139,9 +139,9 @@ void WorkerClient::run()
         ClientContext context;
         Status status = master_stub_->GetTask(&context, request, &response);
 
-        if (status.ok() && response.task_type() != TaskResponse::NO_TASK)
+        if (status.ok() && response.tasktype() != TaskResponse::NO_TASK)
         {
-            std::cout << "Received task: " << response.task_id() << std::endl;
+            std::cout << "Received task: " << response.taskid() << std::endl;
             handleTask(response);
         }
         else
@@ -159,14 +159,14 @@ void WorkerClient::run()
  */
 void WorkerClient::handleTask(const TaskResponse &task)
 {
-    if (task.task_type() == TaskResponse::MAP_TASK)
+    if (task.tasktype() == TaskResponse::MAP_TASK)
     {
-        std::cout << "Handling Map task. Retrieving file from S3: " << task.data_split_path() << std::endl;
-        std::string localPath = "/worker_data/input_" + task.task_id() + ".bin";
-        downloadFileFromS3(task.data_split_path(), localPath);
+        std::cout << "Handling Map task. Retrieving file from S3: " << task.datasplitpath() << std::endl;
+        std::string localPath = "/worker_data/input_" + task.taskid() + ".bin";
+        downloadFileFromS3(task.datasplitpath(), localPath);
 
-        std::string outputKey = "jobs/" + task.job_id() + "/intermediate/" + task.task_id() + ".out";
-        std::string outputPath = "/worker_data/output_" + task.task_id() + ".out";
+        std::string outputKey = "jobs/" + task.jobid() + "/intermediate/" + task.taskid() + ".out";
+        std::string outputPath = "/worker_data/output_" + task.taskid() + ".out";
 
         std::ifstream inputFile(localPath);
         std::ofstream outputFile(outputPath);
@@ -196,17 +196,17 @@ void WorkerClient::handleTask(const TaskResponse &task)
         outputFile.close();
 
         uploadFileToS3(outputPath, outputKey);
-        submitTaskResult(task.task_id(), "worker-1", true, outputKey);
+        submitTaskResult(task.taskid(), "worker-1", true, outputKey);
     }
-    else if (task.task_type() == TaskResponse::REDUCE_TASK)
+    else if (task.tasktype() == TaskResponse::REDUCE_TASK)
     {
         std::cout << "Handling Reduce task." << std::endl;
 
         std::map<std::string, int> wordCounts;
 
-        for (const auto &intermediateFileKey : task.intermediate_files())
+        for (const auto &intermediateFileKey : task.intermediatefiles())
         {
-            std::string localInterimPath = "/worker_data/interim_" + task.task_id() + ".bin";
+            std::string localInterimPath = "/worker_data/interim_" + task.taskid() + ".bin";
             downloadFileFromS3(intermediateFileKey, localInterimPath);
 
             std::ifstream interimFile(localInterimPath);
@@ -222,7 +222,7 @@ void WorkerClient::handleTask(const TaskResponse &task)
             interimFile.close();
         }
 
-        std::string finalPath = "/worker_data/final_result_" + task.task_id() + ".out";
+        std::string finalPath = "/worker_data/final_result_" + task.taskid() + ".out";
         std::ofstream finalOutputFile(finalPath);
         for (const auto &pair : wordCounts)
         {
@@ -230,10 +230,10 @@ void WorkerClient::handleTask(const TaskResponse &task)
         }
         finalOutputFile.close();
 
-        std::string finalResultKey = "jobs/" + task.job_id() + "/final/result_" + task.task_id() + ".out";
+        std::string finalResultKey = "jobs/" + task.jobid() + "/final/result_" + task.taskid() + ".out";
         uploadFileToS3(finalPath, finalResultKey);
 
-        submitTaskResult(task.task_id(), "worker-1", true, finalResultKey);
+        submitTaskResult(task.taskid(), "worker-1", true, finalResultKey);
     }
 }
 
@@ -293,7 +293,7 @@ void WorkerClient::uploadFileToS3(const std::string &sourcePath, const std::stri
  * @brief Submits the result of a completed task to the master.
  * @param taskId The ID of the task that was completed.
  * @param workerId The ID of the worker.
- * @param success A boolean indicating if the task was successful.
+ * @param success A boolean indicating if the task was successful.s
  * @param resultPath The S3 key of the final output file.
  */
 void WorkerClient::submitTaskResult(const std::string &taskId, const std::string &workerId, bool success, const std::string &resultPath)
