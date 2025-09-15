@@ -31,6 +31,7 @@ gridmr\TaskResult.class
 gridmr\TaskResultOrBuilder.class
 gridmr\WorkerRegistrationResponse$1.class
 gridmr\DataTransferServiceGrpc.class
+gridmr\Main.class
 gridmr\MapReduceServiceGrpc$MapReduceServiceFileDescriptorSupplier.class
 gridmr\TaskResultResponse$1.class
 gridmr\DataTransferServiceGrpc$3.class
@@ -53,6 +54,7 @@ gridmr\TaskResultResponse$Builder.class
 gridmr\WorkerRegistrationResponse$Builder.class
 gridmr\TaskResult$Builder.class
 gridmr\MapReduceServiceGrpc$MapReduceServiceBlockingStub.class
+gridmr\MasterService$MasterServiceImpl.class
 gridmr\MapReduceServiceGrpc$MethodHandlers.class
 gridmr\SendFileResponse.class
 gridmr\JobRequest.class
@@ -69,6 +71,8 @@ gridmr\JobResponse$1.class
 gridmr\TaskResult$WordCountResultsDefaultEntryHolder.class
 gridmr\DataTransferServiceGrpc$AsyncService.class
 gridmr\MapReduceServiceGrpc$MapReduceServiceImplBase.class
+gridmr\MasterService$DataTransferServiceImpl.class
 gridmr\FileChunk.class
 gridmr\MapReduceServiceGrpc$2.class
+gridmr\MasterService.class
 gridmr\MapReduceServiceGrpc$MapReduceServiceMethodDescriptorSupplier.class

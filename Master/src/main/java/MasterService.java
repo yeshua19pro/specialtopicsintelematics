@@ -1,3 +1,4 @@
+package gridmr;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -114,19 +115,22 @@ public class MasterService {
         }
     }
 
-    private static class DataTransferServiceImpl extends MapReduceServiceGrpc.MapReduceServiceImplBase {
+    private static class DataTransferServiceImpl extends DataTransferServiceGrpc.DataTransferServiceImplBase {
+        @Override
         public void receiveFile(ReceiveFileRequest request, StreamObserver<FileChunk> responseObserver) {
-            System.out.println("Master receiving request for file: " + request.getFilePath());
             File file = new File(request.getFilePath());
             if (!file.exists()) {
                 responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription("File not found").asRuntimeException());
                 return;
             }
+
             try (FileInputStream fis = new FileInputStream(file)) {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
                 while ((bytesRead = fis.read(buffer)) != -1) {
-                    responseObserver.onNext(FileChunk.newBuilder().setData(ByteString.copyFrom(buffer, 0, bytesRead)).build());
+                    responseObserver.onNext(FileChunk.newBuilder()
+                            .setData(com.google.protobuf.ByteString.copyFrom(buffer, 0, bytesRead))
+                            .build());
                 }
                 responseObserver.onCompleted();
             } catch (IOException e) {
@@ -134,4 +138,5 @@ public class MasterService {
             }
         }
     }
+
 }

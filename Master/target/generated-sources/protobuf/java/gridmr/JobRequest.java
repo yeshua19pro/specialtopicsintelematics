@@ -23,7 +23,7 @@ private static final long serialVersionUID = 0L;
     jobId_ = "";
     mapFunction_ = "";
     reduceFunction_ = "";
-    inputDataPath_ = "";
+    inputDataPath_ = com.google.protobuf.ByteString.EMPTY;
   }
 
   @java.lang.Override
@@ -164,42 +164,14 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int INPUTDATAPATH_FIELD_NUMBER = 4;
-  @SuppressWarnings("serial")
-  private volatile java.lang.Object inputDataPath_ = "";
+  private com.google.protobuf.ByteString inputDataPath_ = com.google.protobuf.ByteString.EMPTY;
   /**
-   * <code>string inputDataPath = 4;</code>
+   * <code>bytes inputDataPath = 4;</code>
    * @return The inputDataPath.
    */
   @java.lang.Override
-  public java.lang.String getInputDataPath() {
-    java.lang.Object ref = inputDataPath_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      inputDataPath_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string inputDataPath = 4;</code>
-   * @return The bytes for inputDataPath.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getInputDataPathBytes() {
-    java.lang.Object ref = inputDataPath_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      inputDataPath_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
+  public com.google.protobuf.ByteString getInputDataPath() {
+    return inputDataPath_;
   }
 
   public static final int NUMREDUCERS_FIELD_NUMBER = 5;
@@ -236,8 +208,8 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(reduceFunction_)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, reduceFunction_);
     }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(inputDataPath_)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, inputDataPath_);
+    if (!inputDataPath_.isEmpty()) {
+      output.writeBytes(4, inputDataPath_);
     }
     if (numReducers_ != 0) {
       output.writeInt32(5, numReducers_);
@@ -260,8 +232,9 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(reduceFunction_)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, reduceFunction_);
     }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(inputDataPath_)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, inputDataPath_);
+    if (!inputDataPath_.isEmpty()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBytesSize(4, inputDataPath_);
     }
     if (numReducers_ != 0) {
       size += com.google.protobuf.CodedOutputStream
@@ -451,7 +424,7 @@ private static final long serialVersionUID = 0L;
       jobId_ = "";
       mapFunction_ = "";
       reduceFunction_ = "";
-      inputDataPath_ = "";
+      inputDataPath_ = com.google.protobuf.ByteString.EMPTY;
       numReducers_ = 0;
       return this;
     }
@@ -562,10 +535,8 @@ private static final long serialVersionUID = 0L;
         bitField0_ |= 0x00000004;
         onChanged();
       }
-      if (!other.getInputDataPath().isEmpty()) {
-        inputDataPath_ = other.inputDataPath_;
-        bitField0_ |= 0x00000008;
-        onChanged();
+      if (other.getInputDataPath() != com.google.protobuf.ByteString.EMPTY) {
+        setInputDataPath(other.getInputDataPath());
       }
       if (other.getNumReducers() != 0) {
         setNumReducers(other.getNumReducers());
@@ -612,7 +583,7 @@ private static final long serialVersionUID = 0L;
               break;
             } // case 26
             case 34: {
-              inputDataPath_ = input.readStringRequireUtf8();
+              inputDataPath_ = input.readBytes();
               bitField0_ |= 0x00000008;
               break;
             } // case 34
@@ -854,47 +825,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object inputDataPath_ = "";
+    private com.google.protobuf.ByteString inputDataPath_ = com.google.protobuf.ByteString.EMPTY;
     /**
-     * <code>string inputDataPath = 4;</code>
+     * <code>bytes inputDataPath = 4;</code>
      * @return The inputDataPath.
      */
-    public java.lang.String getInputDataPath() {
-      java.lang.Object ref = inputDataPath_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        inputDataPath_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
+    @java.lang.Override
+    public com.google.protobuf.ByteString getInputDataPath() {
+      return inputDataPath_;
     }
     /**
-     * <code>string inputDataPath = 4;</code>
-     * @return The bytes for inputDataPath.
-     */
-    public com.google.protobuf.ByteString
-        getInputDataPathBytes() {
-      java.lang.Object ref = inputDataPath_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        inputDataPath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string inputDataPath = 4;</code>
+     * <code>bytes inputDataPath = 4;</code>
      * @param value The inputDataPath to set.
      * @return This builder for chaining.
      */
-    public Builder setInputDataPath(
-        java.lang.String value) {
+    public Builder setInputDataPath(com.google.protobuf.ByteString value) {
       if (value == null) { throw new NullPointerException(); }
       inputDataPath_ = value;
       bitField0_ |= 0x00000008;
@@ -902,26 +847,12 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string inputDataPath = 4;</code>
+     * <code>bytes inputDataPath = 4;</code>
      * @return This builder for chaining.
      */
     public Builder clearInputDataPath() {
-      inputDataPath_ = getDefaultInstance().getInputDataPath();
       bitField0_ = (bitField0_ & ~0x00000008);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string inputDataPath = 4;</code>
-     * @param value The bytes for inputDataPath to set.
-     * @return This builder for chaining.
-     */
-    public Builder setInputDataPathBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) { throw new NullPointerException(); }
-      checkByteStringIsUtf8(value);
-      inputDataPath_ = value;
-      bitField0_ |= 0x00000008;
+      inputDataPath_ = getDefaultInstance().getInputDataPath();
       onChanged();
       return this;
     }
