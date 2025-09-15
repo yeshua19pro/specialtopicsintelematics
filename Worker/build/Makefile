@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named worker
+# Target rules for targets named worker_local
 
 # Build rule for target.
-worker: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 worker
-.PHONY : worker
+worker_local: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 worker_local
+.PHONY : worker_local
 
 # fast build rule for target.
-worker/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/build
-.PHONY : worker/fast
+worker_local/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/build
+.PHONY : worker_local/fast
 
 gridmr.grpc.pb.o: gridmr.grpc.pb.cc.o
 .PHONY : gridmr.grpc.pb.o
 
 # target to build an object file
 gridmr.grpc.pb.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/gridmr.grpc.pb.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/gridmr.grpc.pb.cc.o
 .PHONY : gridmr.grpc.pb.cc.o
 
 gridmr.grpc.pb.i: gridmr.grpc.pb.cc.i
@@ -142,7 +142,7 @@ gridmr.grpc.pb.i: gridmr.grpc.pb.cc.i
 
 # target to preprocess a source file
 gridmr.grpc.pb.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/gridmr.grpc.pb.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/gridmr.grpc.pb.cc.i
 .PHONY : gridmr.grpc.pb.cc.i
 
 gridmr.grpc.pb.s: gridmr.grpc.pb.cc.s
@@ -150,7 +150,7 @@ gridmr.grpc.pb.s: gridmr.grpc.pb.cc.s
 
 # target to generate assembly for a file
 gridmr.grpc.pb.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/gridmr.grpc.pb.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/gridmr.grpc.pb.cc.s
 .PHONY : gridmr.grpc.pb.cc.s
 
 gridmr.pb.o: gridmr.pb.cc.o
@@ -158,7 +158,7 @@ gridmr.pb.o: gridmr.pb.cc.o
 
 # target to build an object file
 gridmr.pb.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/gridmr.pb.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/gridmr.pb.cc.o
 .PHONY : gridmr.pb.cc.o
 
 gridmr.pb.i: gridmr.pb.cc.i
@@ -166,7 +166,7 @@ gridmr.pb.i: gridmr.pb.cc.i
 
 # target to preprocess a source file
 gridmr.pb.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/gridmr.pb.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/gridmr.pb.cc.i
 .PHONY : gridmr.pb.cc.i
 
 gridmr.pb.s: gridmr.pb.cc.s
@@ -174,7 +174,7 @@ gridmr.pb.s: gridmr.pb.cc.s
 
 # target to generate assembly for a file
 gridmr.pb.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/gridmr.pb.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/gridmr.pb.cc.s
 .PHONY : gridmr.pb.cc.s
 
 worker.o: worker.cpp.o
@@ -182,7 +182,7 @@ worker.o: worker.cpp.o
 
 # target to build an object file
 worker.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/worker.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/worker.cpp.o
 .PHONY : worker.cpp.o
 
 worker.i: worker.cpp.i
@@ -190,7 +190,7 @@ worker.i: worker.cpp.i
 
 # target to preprocess a source file
 worker.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/worker.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/worker.cpp.i
 .PHONY : worker.cpp.i
 
 worker.s: worker.cpp.s
@@ -198,7 +198,7 @@ worker.s: worker.cpp.s
 
 # target to generate assembly for a file
 worker.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker.dir/build.make CMakeFiles/worker.dir/worker.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/worker_local.dir/build.make CMakeFiles/worker_local.dir/worker.cpp.s
 .PHONY : worker.cpp.s
 
 # Help Target
@@ -209,7 +209,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... worker"
+	@echo "... worker_local"
 	@echo "... gridmr.grpc.pb.o"
 	@echo "... gridmr.grpc.pb.i"
 	@echo "... gridmr.grpc.pb.s"
