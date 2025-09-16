@@ -1,3 +1,4 @@
+
 package gridmr;
 import gridmr.JobRequest;
 import gridmr.JobResponse;
@@ -108,22 +109,23 @@ public class MasterService {
             String inputS3KeyPrefix = "jobs/" + jobToken + "/input/";
 
             try {
-                // ✅ ahora usamos los bytes directamente
                 byte[] inputData = request.getInputData().toByteArray();
+		int numberOfBlocks = uploadBytesInBlocksToS3(inputData, inputS3KeyPrefix);
 
-                int numberOfBlocks = uploadBytesInBlocksToS3(inputData, inputS3KeyPrefix);
+		for (int i = 0; i < numberOfBlocks; i++) {
+		    String inputS3Key = inputS3KeyPrefix + "block_" + i + ".bin";
+		    String taskId = UUID.randomUUID().toString();
 
-                for (int i = 0; i < numberOfBlocks; i++) {
-                    String inputS3Key = inputS3KeyPrefix + "block_" + i + ".bin";
-                    String taskId = UUID.randomUUID().toString();
-                    TaskResponse mapTask = TaskResponse.newBuilder()
-                            .setTaskId(taskId)
-                            .setTaskType(TaskResponse.TaskType.MAP_TASK)
-                            .setDataSplitPath(inputS3Key)
-                            .setJobId(request.getJobId())
-                            .build();
-                    mapTasks.add(mapTask);
-                }
+		    TaskResponse mapTask = TaskResponse.newBuilder()
+		            .setTaskId(taskId)
+		            .setTaskType(TaskResponse.TaskType.MAP_TASK)
+		            .setDataSplitPath(inputS3Key)
+		            .setJobId(jobToken)
+		            .build();
+
+		    mapTasks.add(mapTask);
+		}
+
 
                 JobResponse response = JobResponse.newBuilder()
                         .setSuccess(true)
@@ -167,23 +169,30 @@ public class MasterService {
          * @param responseObserver A stream observer to send back the assigned
          * task.
          */
-        @Override
-        public void getTask(TaskRequest request, StreamObserver<TaskResponse> responseObserver) {
-            TaskResponse task = mapTasks.poll();
-            if (task != null) {
-                runningTasks.put(task.getTaskId(), task);
-                responseObserver.onNext(task);
-            } else {
-                task = reduceTasks.poll();
-                if (task != null) {
-                    runningTasks.put(task.getTaskId(), task);
-                    responseObserver.onNext(task);
-                } else {
-                    responseObserver.onNext(TaskResponse.newBuilder().setTaskType(TaskResponse.TaskType.NO_TASK).build());
-                }
-            }
-            responseObserver.onCompleted();
-        }
+	@Override
+	public void getTask(TaskRequest request, StreamObserver<TaskResponse> responseObserver) {
+	    System.out.println("Task requested by worker " + request.getWorkerId());
+	    System.out.println("[DEBUG] Map queue size before poll: " + mapTasks.size());
+
+	    TaskResponse task = mapTasks.poll();
+	    if (task != null) {
+	        runningTasks.put(task.getTaskId(), task);
+	        System.out.println("[DEBUG] Assigning MAP task " + task.getTaskId() + " to worker " + request.getWorkerId());
+	        responseObserver.onNext(task);
+	    } else {
+	        task = reduceTasks.poll();
+	        if (task != null) {
+	            runningTasks.put(task.getTaskId(), task);
+	            System.out.println("[DEBUG] Assigning REDUCE task " + task.getTaskId() + " to worker " + request.getWorkerId());
+	            responseObserver.onNext(task);
+	        } else {
+	            System.out.println("[DEBUG] No tasks left, sending NO_TASK");
+	            responseObserver.onNext(TaskResponse.newBuilder().setTaskType(TaskResponse.TaskType.NO_TASK).build());
+	        }
+	    }
+	    responseObserver.onCompleted();
+	}
+
 
         /**
          * Receives the result of a completed task from a worker.
