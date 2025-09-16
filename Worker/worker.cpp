@@ -315,6 +315,7 @@ void WorkerClient::submitTaskResult(const std::string &taskId, const std::string
  * @param argv An array of command-line arguments.
  * @return 0 on success, 1 on error.
  */
+
 int main(int argc, char **argv)
 {
     if (argc < 3)
@@ -328,7 +329,15 @@ int main(int argc, char **argv)
 
     std::string master_address = argv[1];
     std::string worker_address = argv[2];
-    std::string s3BucketName = "your-unique-gridmr-bucket-name";
+
+    const char *bucketEnv = std::getenv("AWS_BUCKET_NAME");
+    if (!bucketEnv)
+    {
+        std::cerr << "Environment variable AWS_BUCKET_NAME not set!" << std::endl;
+        Aws::ShutdownAPI(options);
+        return 1;
+    }
+    std::string s3BucketName = bucketEnv;
 
     WorkerClient worker(grpc::CreateChannel(master_address, grpc::InsecureChannelCredentials()), s3BucketName);
     worker.registerWorker("worker-1", worker_address);

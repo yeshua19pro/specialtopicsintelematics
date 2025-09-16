@@ -23,15 +23,9 @@ def run():
     # Enviar el Job al Master
     response = stub.SubmitJob(job_request)
     if response.success:
-        print("✅ Job submitted successfully:", response.message)
+        print("Job submitted successfully:", response.message)
     else:
-        print("❌ Job submission failed:", response.message)
-
-    # Simulación de pedir tarea al Master
-    task_request = gridmr_pb2.TaskRequest(workerId="client-test")
-    task_response = stub.GetTask(task_request)
-
-    print("📌 Task response from master:", task_response)
+        print("Job submission failed:", response.message)
 
 
 if __name__ == "__main__":
